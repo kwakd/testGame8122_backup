@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -16,19 +18,32 @@ public class PlayerController : MonoBehaviour
     private State state = State.idle;
 
     //inpector variables
-    [SerializeField] private LayerMask ground;
-    [SerializeField] private float     speed     = 7f;
-    [SerializeField] private float     jumpForce = 10f;
-    [SerializeField] private int       apples    = 0;
-    [SerializeField] private Text      appleText;
-    [SerializeField] private float     hurtForce = 5f;
+    [SerializeField] private LayerMask       ground;
+
+    [SerializeField] private float           speed     = 7f;
+    [SerializeField] private float           jumpForce = 10f;
+    [SerializeField] private float           hurtForce = 5f;
+
+    [SerializeField] private int             apples    = 0;
+    [SerializeField] private int             health;
+
+    [SerializeField] private TextMeshProUGUI appleText;
+
+    [SerializeField] private Text           healthAmount;
+
+    [SerializeField] private AudioSource     appleSound;
+    [SerializeField] private AudioSource     footstep;
+
+
+
 
 
     private void Start()
     {
-        rb   = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
-        coll = GetComponent<Collider2D>();
+        rb      = GetComponent<Rigidbody2D>();
+        anim    = GetComponent<Animator>();
+        coll    = GetComponent<Collider2D>();
+        healthAmount.text = health.ToString();
     } //private void Start()
 
     private void Update()
@@ -46,9 +61,18 @@ public class PlayerController : MonoBehaviour
     {
         if(collision.tag == "Collectable") 
         {
+            appleSound.Play();
             Destroy(collision.gameObject);
             apples += 1;
             appleText.text = apples.ToString();
+        }
+
+        if(collision.tag == "Powerup") 
+        {
+            Destroy(collision.gameObject);
+            jumpForce = 25f;
+            GetComponent<SpriteRenderer>().color = Color.yellow;
+            StartCoroutine(ResetPower());
         }
     }
 
@@ -65,6 +89,7 @@ public class PlayerController : MonoBehaviour
             else
             {
                 state = State.hurt;
+                HandleHealth(); // Deals with health, updating ui, and resets level if health is <= 0
                 if(other.gameObject.transform.position.x > transform.position.x)
                 {
                     // Enemy is to my right so player is damaged and moved left
@@ -76,6 +101,16 @@ public class PlayerController : MonoBehaviour
                     rb.velocity = new Vector2(hurtForce, rb.velocity.y);
                 }
             }
+        }
+    }
+
+    private void HandleHealth()
+    {
+        health -= 1;
+        healthAmount.text = health.ToString();
+        if(health <= 0)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 
@@ -145,7 +180,19 @@ public class PlayerController : MonoBehaviour
             state = State.idle;
         }
 
-    } // private void VelocityState()
+    }
+
+    private void Footstep()
+    {
+        footstep.Play();
+    }
+
+    private IEnumerator ResetPower()
+    {
+        yield return new WaitForSeconds(10);
+        jumpForce = 10;
+        GetComponent<SpriteRenderer>().color = Color.white;
+    }
 
 
 
