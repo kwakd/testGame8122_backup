@@ -21,15 +21,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask       ground;
 
     [SerializeField] private float           speed     = 7f;
-    [SerializeField] private float           jumpForce = 10f;
+    [SerializeField] private float           jumpForce = 25f;
     [SerializeField] private float           hurtForce = 5f;
-
-    [SerializeField] private int             apples    = 0;
-    [SerializeField] private int             health;
-
-    [SerializeField] private TextMeshProUGUI appleText;
-
-    [SerializeField] private Text           healthAmount;
 
     [SerializeField] private AudioSource     appleSound;
     [SerializeField] private AudioSource     footstep;
@@ -43,7 +36,7 @@ public class PlayerController : MonoBehaviour
         rb      = GetComponent<Rigidbody2D>();
         anim    = GetComponent<Animator>();
         coll    = GetComponent<Collider2D>();
-        healthAmount.text = health.ToString();
+        PermanentUI.perm.healthAmount.text = PermanentUI.perm.health.ToString();
     } //private void Start()
 
     private void Update()
@@ -63,14 +56,14 @@ public class PlayerController : MonoBehaviour
         {
             appleSound.Play();
             Destroy(collision.gameObject);
-            apples += 1;
-            appleText.text = apples.ToString();
+            PermanentUI.perm.apples += 1;
+            PermanentUI.perm.appleText.text = PermanentUI.perm.apples.ToString();
         }
 
         if(collision.tag == "Powerup") 
         {
             Destroy(collision.gameObject);
-            jumpForce = 25f;
+            jumpForce = 35f;
             GetComponent<SpriteRenderer>().color = Color.yellow;
             StartCoroutine(ResetPower());
         }
@@ -106,9 +99,9 @@ public class PlayerController : MonoBehaviour
 
     private void HandleHealth()
     {
-        health -= 1;
-        healthAmount.text = health.ToString();
-        if(health <= 0)
+        PermanentUI.perm.health -= 1;
+        PermanentUI.perm.healthAmount.text = PermanentUI.perm.health.ToString();
+        if(PermanentUI.perm.health <= 0)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
@@ -190,7 +183,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator ResetPower()
     {
         yield return new WaitForSeconds(10);
-        jumpForce = 10;
+        jumpForce = 25f;
         GetComponent<SpriteRenderer>().color = Color.white;
     }
 

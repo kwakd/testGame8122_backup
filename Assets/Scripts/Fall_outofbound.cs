@@ -10,6 +10,7 @@ public class Fall_outofbound : MonoBehaviour
     {
         if(collision.gameObject.tag == "Player")
         {
+            PermanentUI.perm.Reset();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
